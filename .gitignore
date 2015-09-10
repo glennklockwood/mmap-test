@@ -1,3 +1,5 @@
+test-mmap
+
 # Object files
 *.o
 *.ko
