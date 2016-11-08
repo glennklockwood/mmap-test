@@ -15,6 +15,9 @@
 #include <sys/resource.h>
 
 #include <fcntl.h>
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
 
 /*
  * Prototypes
@@ -26,20 +29,25 @@ void report_faults( char *string );
 /*
  * Principal test
  */
-int main( int *argc, char **argv ) {
+int main( int argc, char **argv ) {
     struct stat st;
     void *values, *vptr;
     size_t page_size;
     size_t stride;
     int fd, i;
 
+#ifdef HAVE_MPI
+    MPI_Init( &argc, &argv );
+#endif
+
     if ( !(fd = open( argv[1], O_RDWR, 0 )) ) return 1;
     drop_cached_pages( fd );
 
     fstat( fd, &st );
-    get_cached_page_ct( values, st.st_size );
 
     values = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0 );
+
+    get_cached_page_ct( values, st.st_size );
 
     if ( values == MAP_FAILED ) {
         close(fd);
@@ -69,6 +77,10 @@ int main( int *argc, char **argv ) {
         return 2;
 
     close(fd);
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
     return 0;
 }
 

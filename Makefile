@@ -1,1 +1,1 @@
-test-mmap: 
+test-mmap: test-mmap.c
